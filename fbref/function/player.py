@@ -287,6 +287,9 @@ def get_big5_combined(season: str) -> pd.DataFrame:
     df.drop([i for i in df.columns if 'remove' in i or i == 'Matches'],
                axis=1, inplace=True)
 
+    if season == '2023-2024':
+        df['Age'] = df['Age'].apply(lambda x: x.split('-')[0])
+        
     for col in df.columns:
       if col in ['Rk', 'Player', 'Nation', 'Pos', 'Squad', 'Comp']:
         pass
