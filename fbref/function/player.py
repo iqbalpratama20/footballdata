@@ -2,6 +2,7 @@ import requests
 import re
 from bs4 import BeautifulSoup
 import pandas as pd
+import numpy as np
 
 def scraping(url: str, id: str, comp: str, columns: list) -> pd.DataFrame:
     """ Scrape dataframe from given url for non big 5 Leagues
@@ -44,6 +45,7 @@ def scraping(url: str, id: str, comp: str, columns: list) -> pd.DataFrame:
     df = pd.DataFrame(data)
     df['Rk']= df.reset_index().index + 1
     df['Comp'] = comp
+    df.replace('', np.nan, inplace=True)
     df.fillna('0', inplace=True)
     return df
 
@@ -266,6 +268,37 @@ def get_misc(url: str, comp: str = None) -> pd.DataFrame:
     if comp:
         return df[columns]
     df.columns = columns
+    return df
+
+def combine_df(standard: pd.DataFrame, shooting: pd.DataFrame, passing: pd.DataFrame,
+               pass_types: pd.DataFrame, gsc: pd.DataFrame, defense: pd.DataFrame,
+               possession: pd.DataFrame, playing_time: pd.DataFrame, misc: pd.DataFrame, season: str) -> pd.DataFrame:
+    
+    playing_time.drop(playing_time.loc[playing_time['Matches Played'] == '0'].index, inplace=True)
+    playing_time['Rk']= playing_time.reset_index().index + 1
+
+    df = pd.merge(standard, shooting, on='Rk', suffixes=('', '_remove')).merge(passing, on='Rk', suffixes=('', '_remove')).merge(pass_types, on='Rk', suffixes=('', '_remove')).merge(gsc, on='Rk', suffixes=('', '_remove')).merge(defense, on='Rk', suffixes=('', '_remove')).merge(possession, on='Rk', suffixes=('', '_remove')).merge(misc, on='Rk', suffixes=('', '_remove')).merge(playing_time, on='Rk', suffixes=('', '_remove'))
+
+    df.drop([i for i in df.columns if 'remove' in i or i == 'Matches'],
+               axis=1, inplace=True)
+
+    if season == '2023-2024':
+        df['Age'] = df['Age'].apply(lambda x: x.split('-')[0])
+        
+    for col in df.columns:
+      if col in ['Rk', 'Player', 'Nation', 'Pos', 'Squad', 'Comp']:
+        pass
+      elif col in ['Age', 'Born', 'Matches Played', 'Starts', 'Minutes', 'Minutes per Match', 'Minutes per Start']:
+        df[col] = df[col].apply(lambda x: x.replace(',', ''))
+        df[col] = df[col].astype('int64')
+      else:
+        df[col] = df[col].apply(lambda x: x.replace(',', ''))
+        df[col] = df[col].astype('float64')
+
+    df['Turnover'] = (df['Attempted Passes Total'] - df['Completed Passes Total']) + df['Dispossessed'] + df['TakeOns Tackled'] + df['Miscontrols']
+    df['Turnover%'] = round((df['Turnover'] / df['Touches']) * 100, 2)
+    df['Turnover/90'] = round(df['Turnover'] / df['90s'], 2)
+    df['Season'] = season
     return df
 
 def get_big5_combined(season: str) -> pd.DataFrame:
