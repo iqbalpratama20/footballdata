@@ -100,11 +100,11 @@ def get_gsc(url: str, comp: str) -> pd.DataFrame:
     columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
                'SCA', 'SCA90', 'SCAPassLive', 'SCAPassDead', 'SCATakeOns',
                'SCAShot', 'SCAFouled', 'SCADefAct', 'GCA', 'GCA90', 'GCAPassLive',
-               'GCAPassDead', 'GCATakeOns', 'GCAShot', 'GCAFouled', 'GCADefAct']
+               'GCAPassDead', 'GCATakeOns', 'GCAShot', 'GCAFouled', 'GCADefAct', 'Matches']
     
     df = scraping(url, "stats_gca", comp, columns)
 
-    columns = ['Rk', 'Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
+    columns = ['Rk', 'Player', 'Nation', 'Pos', 'Squad', 'Comp', 'Age', 'Born', '90s',
                'SCA', 'SCA90', 'SCAPassLive', 'SCAPassDead', 'SCATakeOns',
                'SCAShot', 'SCAFouled', 'SCADefAct', 'GCA', 'GCA90', 'GCAPassLive',
                'GCAPassDead', 'GCATakeOns', 'GCAShot', 'GCAFouled', 'GCADefAct', 'Matches']
@@ -112,13 +112,73 @@ def get_gsc(url: str, comp: str) -> pd.DataFrame:
     return df[columns]
 
 def get_defensive_action(url: str, comp: str) -> pd.DataFrame:
-    return True
+    columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
+               'Tackles', 'Tackles Won', 'Def 3rd Tackles', 'Mid 3rd Tackles',
+               'Att 3rd Tackles', 'Dribblers Tackled', 'Dribbles Challenged',
+               'Dribbles Challenged%', 'Challenges Lost', 'Blocks', 'Shots Blocked', 
+               'Pass Blocked', 'Interceptions', 'Interceptions+Tackles', 'Clearances', 'Errors', 'Matches']
+
+    df = scraping(url, "stats_defense", comp, columns)
+
+    columns = ['Rk', 'Player', 'Nation', 'Pos', 'Squad', 'Comp', 'Age', 'Born', '90s',
+               'Tackles', 'Tackles Won', 'Def 3rd Tackles', 'Mid 3rd Tackles',
+               'Att 3rd Tackles', 'Dribblers Tackled', 'Dribbles Challenged',
+               'Dribbles Challenged%', 'Challenges Lost', 'Blocks', 'Shots Blocked', 
+               'Pass Blocked', 'Interceptions', 'Interceptions+Tackles', 'Clearances', 'Errors', 'Matches']
+ 
+    return df[columns]
 
 def get_possession(url: str, comp: str) -> pd.DataFrame:
-    return True
+    columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
+               'Touches', 'Def Pen Touches', 'Def 3rd Touches', 'Mid 3rd Touches',
+               'Att 3rd Touches', 'Att Pen Touches', 'Live Touches', 'TakeOns Attempted',
+               'Successful TakeOns', 'Successful TakeOns%', 'TakeOns Tackled', 'TakeOns Tackled %', 
+               'Carries', 'Total Carries Distance', 'Progressive Carries Distance', 'Progressive Carries',
+               'Carries to Final Third', 'Carries to Pen Area', 'Miscontrols', 'Dispossessed', 
+               'Passes Received', 'Progressive Passes Received', 'Matches']
+    
+    df = scraping(url, "stats_possession", comp, columns)
+
+    columns = ['Rk', 'Player', 'Nation', 'Pos', 'Squad', 'Comp', 'Age', 'Born', '90s',
+               'Touches', 'Def Pen Touches', 'Def 3rd Touches', 'Mid 3rd Touches',
+               'Att 3rd Touches', 'Att Pen Touches', 'Live Touches', 'TakeOns Attempted',
+               'Successful TakeOns', 'Successful TakeOns%', 'TakeOns Tackled', 'TakeOns Tackled %', 
+               'Carries', 'Total Carries Distance', 'Progressive Carries Distance', 'Progressive Carries',
+               'Carries to Final Third', 'Carries to Pen Area', 'Miscontrols', 'Dispossessed', 
+               'Passes Received', 'Progressive Passes Received', 'Matches']
+
+    return df[columns]
 
 def get_playing_time(url: str, comp: str) -> pd.DataFrame:
-    return True
+    columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born',
+               'Matches Played', 'Minutes', 'Minutes per Match', 'Minutes%', '90s',
+               'Starts', 'Minutes per Start', 'Complete Match', 'Subs', 'Minutes per Subs',
+               'Unused Subs', 'PPM', 'onG', 'onGA', 'G+/-', 'G+/-90', 'On-Off', 'onxG', 'onxGA',
+               'xG+/-', 'xG+/-90', 'xGOn-Off', 'Matches']
+    
+    df = scraping(url, "stats_playing_time", comp, columns)
+
+    columns = ['Rk', 'Player', 'Nation', 'Pos', 'Squad', 'Comp', 'Age', 'Born',
+               'Matches Played', 'Minutes', 'Minutes per Match', 'Minutes%', '90s',
+               'Starts', 'Minutes per Start', 'Complete Match', 'Subs', 'Minutes per Subs',
+               'Unused Subs', 'PPM', 'onG', 'onGA', 'G+/-', 'G+/-90', 'On-Off', 'onxG', 'onxGA',
+               'xG+/-', 'xG+/-90', 'xGOn-Off', 'Matches']
+    
+    return df[columns]
 
 def get_misc(url: str, comp: str) -> pd.DataFrame:
-    return True
+    columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
+               'Yellow Card', 'Red Card', '2nd Yellow', 'Fouls', 'Fouled',
+               'Offsides', 'Crosses', 'Interceptions', 'Tackles Won', 'Pen Won',
+               'Pen Conceded', 'Own Goals', 'Recoveries', 'Aerial Won', 'Aerial Lost', 
+               'Aerial Won%', 'Matches']
+    
+    df = scraping(url, "stats_misc", comp, columns)
+
+    columns = ['Rk', 'Player', 'Nation', 'Pos', 'Squad', 'Comp', 'Age', 'Born', '90s',
+               'Yellow Card', 'Red Card', '2nd Yellow', 'Fouls', 'Fouled',
+               'Offsides', 'Crosses', 'Interceptions', 'Tackles Won', 'Pen Won',
+               'Pen Conceded', 'Own Goals', 'Recoveries', 'Aerial Won', 'Aerial Lost', 
+               'Aerial Won%', 'Matches']
+    
+    return df[columns]
