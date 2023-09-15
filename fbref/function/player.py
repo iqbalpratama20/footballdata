@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import pandas as pd
 
 def scraping(url: str, id: str, comp: str, columns: list) -> pd.DataFrame:
-    """ Scrape dataframe from given url
+    """ Scrape dataframe from given url for non big 5 Leagues
 
     Parameters
     ----------
@@ -44,81 +44,145 @@ def scraping(url: str, id: str, comp: str, columns: list) -> pd.DataFrame:
     df = pd.DataFrame(data)
     df['Rk']= df.reset_index().index + 1
     df['Comp'] = comp
+    df.fillna('0', inplace=True)
     return df
 
-def get_standard_stats(url: str, comp: str) -> pd.DataFrame:
+def clean_df(df: pd.DataFrame) -> pd.DataFrame:
+    """ Clean dataframe for big 5 leagues
+
+    Parameters
+    ----------
+    df  : pd.DataFrame
+        Source dataframe from given url
+    
+    Returns
+    -------
+    cleaned Dataframe with missing values also filled
+    """
+
+    df = df.droplevel(level=0, axis=1)
+    df.drop(df[df['Rk'] == 'Rk'].index, inplace=True)
+    df['Comp'] = df['Comp'].apply(lambda x: ' '.join(x.split(' ')[1:]))
+    df['Rk'] = df['Rk'].astype('int64')
+    df.fillna('0', inplace=True)
+    return df
+
+def get_standard_stats(url: str, comp: str = None) -> pd.DataFrame:
     columns = ['Player', 'Nation','Pos','Squad','Age','Born','MP','Starts','Min','90s','Gls','Ast','G+A','G-PK','PK','PKatt',
            'CrdY','CrdR','xG','npxG','xAG','npxG+xAG','PrgC','PrgP','PrgR','Gls/90','Ast/90',
            'G+A/90','G-PK/90','G+A-PK/90','xG/90','xAG/90','xG+xAG/90','npxG/90','npxG+xAG/90','Matches']
     
-    df = scraping(url, "stats_standard", comp, columns)
-    
+    if comp:
+        df = scraping(url, "stats_standard", comp, columns)
+    else:
+        df = clean_df(pd.read_html(url)[0])
+
     columns = ['Rk', 'Player', 'Nation','Pos','Squad','Comp', 'Age','Born','MP','Starts','Min','90s','Gls','Ast',
                'G+A','G-PK','PK','PKatt', 'CrdY','CrdR','xG','npxG','xAG','npxG+xAG','PrgC','PrgP','PrgR','Gls/90','Ast/90',
                'G+A/90','G-PK/90','G+A-PK/90','xG/90','xAG/90','xG+xAG/90','npxG/90','npxG+xAG/90','Matches']
-    return df[columns]
+    if comp:
+        return df[columns]
+    df.columns = columns
+    return df
+    
 
-def get_shooting(url: str, comp: str) -> pd.DataFrame:
+def get_shooting(url: str, comp: str = None) -> pd.DataFrame:
     columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
        'Gls', 'Sh', 'SoT', 'SoT%', 'Sh/90', 'SoT/90', 'G/Sh', 'G/SoT', 'Dist',
        'FK', 'PK', 'PKatt', 'xG', 'npxG', 'npxG/Sh', 'G-xG', 'np:G-xG', 'Matches']
     
-    df = scraping(url, "stats_shooting", comp, columns)
+    if comp:
+        df = scraping(url, "stats_shooting", comp, columns)
+    else:
+        df = clean_df(pd.read_html(url)[0])
     
     columns = ['Rk', 'Player', 'Nation', 'Pos', 'Squad', 'Comp', 'Age', 'Born', '90s',
        'Gls', 'Sh', 'SoT', 'SoT%', 'Sh/90', 'SoT/90', 'G/Sh', 'G/SoT', 'Dist',
        'FK', 'PK', 'PKatt', 'xG', 'npxG', 'npxG/Sh', 'G-xG', 'np:G-xG', 'Matches']
-    return df[columns]
-
-def get_passing(url: str, comp: str) -> pd.DataFrame:
-    columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
-       'CmpTot', 'AttTot', 'CmpTot%', 'TotDist', 'PrgDist', 'CmpS', 'AttS', 'CmpS%', 'CmpM',
-       'AttM', 'CmpM%', 'CmpL', 'AttL', 'CmpL%', 'Ast', 'xAG', 'xA', 'A-xAG', 'KP',
-       '1/3', 'PPA', 'CrsPA', 'PrgP', 'Matches']
     
-    df = scraping(url, "stats_passing", comp, columns)
+    if comp:
+        return df[columns]
+    df.columns = columns
+    return df
+
+def get_passing(url: str, comp: str = None) -> pd.DataFrame:
+    columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
+       'Completed Passes Total', 'Attempted Passes Total', 'Completed Passes Total%', 
+       'Total Passing Distance', 'Progressive Passing Distance', 'Completed Short Passes', 
+       'Attempted Short Passes', 'Completed Short Passes%', 'Completed Medium Passes', 'Attempted Medium Passes', 
+       'Completed Medium Passes%', 'Completed Long Passes', 'Attempted Long Passes', 'Completed Long Passes%', 
+       'Ast', 'xAG', 'xA', 'A-xAG', 'Key Passes', 'Passes Into Final 3rd', 'Passes Into Pen Area', 
+       'Crossing Into Pen Area', 'Progressive Passes', 'Matches']
+    
+    if comp:
+        df = scraping(url, "stats_passing", comp, columns)
+    else:
+        df = clean_df(pd.read_html(url)[0])
     
     columns = ['Rk', 'Player', 'Nation', 'Pos', 'Squad', 'Comp', 'Age', 'Born', '90s',
-       'CmpTot', 'AttTot', 'CmpTot%', 'TotDist', 'PrgDist', 'CmpS', 'AttS', 'CmpS%', 'CmpM',
-       'AttM', 'CmpM%', 'CmpL', 'AttL', 'CmpL%', 'Ast', 'xAG', 'xA', 'A-xAG', 'KP',
-       '1/3', 'PPA', 'CrsPA', 'PrgP']
-    return df[columns]
+       'Completed Passes Total', 'Attempted Passes Total', 'Completed Passes Total%', 
+       'Total Passing Distance', 'Progressive Passing Distance', 'Completed Short Passes', 
+       'Attempted Short Passes', 'Completed Short Passes%', 'Completed Medium Passes', 'Attempted Medium Passes', 
+       'Completed Medium Passes%', 'Completed Long Passes', 'Attempted Long Passes', 'Completed Long Passes%', 
+       'Ast', 'xAG', 'xA', 'A-xAG', 'Key Passes', 'Passes Into Final 3rd', 'Passes Into Pen Area', 
+       'Crossing Into Pen Area', 'Progressive Passes', 'Matches']
+    
+    if comp:
+        return df[columns]
+    df.columns = columns
+    return df
 
-def get_pass_type(url: str, comp: str) -> pd.DataFrame:
+def get_pass_type(url: str, comp: str = None) -> pd.DataFrame:
     columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
        'Att', 'Live', 'Dead', 'FK', 'TB', 'Sw', 'Crs', 'TI', 'CK', 'In', 'Out',
        'Str', 'Cmp', 'Off', 'Blocks', 'Matches']
     
-    df = scraping(url, "stats_passing_types", comp, columns)
+    if comp:
+        df = scraping(url, "stats_passing_types", comp, columns)
+    else:
+        df = clean_df(pd.read_html(url)[0])
     
     columns = ['Rk', 'Player', 'Nation', 'Pos', 'Squad', 'Comp', 'Age', 'Born', '90s',
        'Att', 'Live', 'Dead', 'FK', 'TB', 'Sw', 'Crs', 'TI', 'CK', 'In', 'Out',
-       'Str', 'Cmp', 'Off', 'Blocks']
-    return df[columns]
+       'Str', 'Cmp', 'Off', 'Blocks', 'Matches']
+    
+    if comp:
+        return df[columns]
+    df.columns = columns
+    return df
 
-def get_gsc(url: str, comp: str) -> pd.DataFrame:
+def get_gsc(url: str, comp: str = None) -> pd.DataFrame:
     columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
                'SCA', 'SCA90', 'SCAPassLive', 'SCAPassDead', 'SCATakeOns',
                'SCAShot', 'SCAFouled', 'SCADefAct', 'GCA', 'GCA90', 'GCAPassLive',
                'GCAPassDead', 'GCATakeOns', 'GCAShot', 'GCAFouled', 'GCADefAct', 'Matches']
     
-    df = scraping(url, "stats_gca", comp, columns)
+    if comp:
+        df = scraping(url, "stats_gca", comp, columns)
+    else:
+        df = clean_df(pd.read_html(url)[0])
 
     columns = ['Rk', 'Player', 'Nation', 'Pos', 'Squad', 'Comp', 'Age', 'Born', '90s',
                'SCA', 'SCA90', 'SCAPassLive', 'SCAPassDead', 'SCATakeOns',
                'SCAShot', 'SCAFouled', 'SCADefAct', 'GCA', 'GCA90', 'GCAPassLive',
                'GCAPassDead', 'GCATakeOns', 'GCAShot', 'GCAFouled', 'GCADefAct', 'Matches']
 
-    return df[columns]
+    if comp:
+        return df[columns]
+    df.columns = columns
+    return df
 
-def get_defensive_action(url: str, comp: str) -> pd.DataFrame:
+def get_defensive_action(url: str, comp: str = None) -> pd.DataFrame:
     columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
                'Tackles', 'Tackles Won', 'Def 3rd Tackles', 'Mid 3rd Tackles',
                'Att 3rd Tackles', 'Dribblers Tackled', 'Dribbles Challenged',
                'Dribbles Challenged%', 'Challenges Lost', 'Blocks', 'Shots Blocked', 
                'Pass Blocked', 'Interceptions', 'Interceptions+Tackles', 'Clearances', 'Errors', 'Matches']
 
-    df = scraping(url, "stats_defense", comp, columns)
+    if comp:
+        df = scraping(url, "stats_defense", comp, columns)
+    else:
+        df = clean_df(pd.read_html(url)[0])
 
     columns = ['Rk', 'Player', 'Nation', 'Pos', 'Squad', 'Comp', 'Age', 'Born', '90s',
                'Tackles', 'Tackles Won', 'Def 3rd Tackles', 'Mid 3rd Tackles',
@@ -126,9 +190,12 @@ def get_defensive_action(url: str, comp: str) -> pd.DataFrame:
                'Dribbles Challenged%', 'Challenges Lost', 'Blocks', 'Shots Blocked', 
                'Pass Blocked', 'Interceptions', 'Interceptions+Tackles', 'Clearances', 'Errors', 'Matches']
  
-    return df[columns]
+    if comp:
+        return df[columns]
+    df.columns = columns
+    return df
 
-def get_possession(url: str, comp: str) -> pd.DataFrame:
+def get_possession(url: str, comp: str = None) -> pd.DataFrame:
     columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
                'Touches', 'Def Pen Touches', 'Def 3rd Touches', 'Mid 3rd Touches',
                'Att 3rd Touches', 'Att Pen Touches', 'Live Touches', 'TakeOns Attempted',
@@ -137,7 +204,10 @@ def get_possession(url: str, comp: str) -> pd.DataFrame:
                'Carries to Final Third', 'Carries to Pen Area', 'Miscontrols', 'Dispossessed', 
                'Passes Received', 'Progressive Passes Received', 'Matches']
     
-    df = scraping(url, "stats_possession", comp, columns)
+    if comp:
+        df = scraping(url, "stats_possession", comp, columns)
+    else:
+        df = clean_df(pd.read_html(url)[0])
 
     columns = ['Rk', 'Player', 'Nation', 'Pos', 'Squad', 'Comp', 'Age', 'Born', '90s',
                'Touches', 'Def Pen Touches', 'Def 3rd Touches', 'Mid 3rd Touches',
@@ -147,16 +217,22 @@ def get_possession(url: str, comp: str) -> pd.DataFrame:
                'Carries to Final Third', 'Carries to Pen Area', 'Miscontrols', 'Dispossessed', 
                'Passes Received', 'Progressive Passes Received', 'Matches']
 
-    return df[columns]
+    if comp:
+        return df[columns]
+    df.columns = columns
+    return df
 
-def get_playing_time(url: str, comp: str) -> pd.DataFrame:
+def get_playing_time(url: str, comp: str = None) -> pd.DataFrame:
     columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born',
                'Matches Played', 'Minutes', 'Minutes per Match', 'Minutes%', '90s',
                'Starts', 'Minutes per Start', 'Complete Match', 'Subs', 'Minutes per Subs',
                'Unused Subs', 'PPM', 'onG', 'onGA', 'G+/-', 'G+/-90', 'On-Off', 'onxG', 'onxGA',
                'xG+/-', 'xG+/-90', 'xGOn-Off', 'Matches']
     
-    df = scraping(url, "stats_playing_time", comp, columns)
+    if comp:
+        df = scraping(url, "stats_playing_time", comp, columns)
+    else:
+        df = clean_df(pd.read_html(url)[0])
 
     columns = ['Rk', 'Player', 'Nation', 'Pos', 'Squad', 'Comp', 'Age', 'Born',
                'Matches Played', 'Minutes', 'Minutes per Match', 'Minutes%', '90s',
@@ -164,16 +240,22 @@ def get_playing_time(url: str, comp: str) -> pd.DataFrame:
                'Unused Subs', 'PPM', 'onG', 'onGA', 'G+/-', 'G+/-90', 'On-Off', 'onxG', 'onxGA',
                'xG+/-', 'xG+/-90', 'xGOn-Off', 'Matches']
     
-    return df[columns]
+    if comp:
+        return df[columns]
+    df.columns = columns
+    return df
 
-def get_misc(url: str, comp: str) -> pd.DataFrame:
+def get_misc(url: str, comp: str = None) -> pd.DataFrame:
     columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
                'Yellow Card', 'Red Card', '2nd Yellow', 'Fouls', 'Fouled',
                'Offsides', 'Crosses', 'Interceptions', 'Tackles Won', 'Pen Won',
                'Pen Conceded', 'Own Goals', 'Recoveries', 'Aerial Won', 'Aerial Lost', 
                'Aerial Won%', 'Matches']
     
-    df = scraping(url, "stats_misc", comp, columns)
+    if comp:
+        df = scraping(url, "stats_misc", comp, columns)
+    else:
+        df = clean_df(pd.read_html(url)[0])
 
     columns = ['Rk', 'Player', 'Nation', 'Pos', 'Squad', 'Comp', 'Age', 'Born', '90s',
                'Yellow Card', 'Red Card', '2nd Yellow', 'Fouls', 'Fouled',
@@ -181,4 +263,40 @@ def get_misc(url: str, comp: str) -> pd.DataFrame:
                'Pen Conceded', 'Own Goals', 'Recoveries', 'Aerial Won', 'Aerial Lost', 
                'Aerial Won%', 'Matches']
     
-    return df[columns]
+    if comp:
+        return df[columns]
+    df.columns = columns
+    return df
+
+def get_big5_combined(season: str) -> pd.DataFrame:
+    standard = get_standard_stats(f'https://fbref.com/en/comps/Big5/{season}/stats/players/{season}-Big-5-European-Leagues-Stats')
+    shooting = get_shooting(f'https://fbref.com/en/comps/Big5/{season}/shooting/players/{season}-Big-5-European-Leagues-Stats')
+    passing = get_passing(f'https://fbref.com/en/comps/Big5/{season}/passing/players/{season}-Big-5-European-Leagues-Stats')
+    pass_types = get_pass_type(f'https://fbref.com/en/comps/Big5/{season}/passing_types/players/{season}-Big-5-European-Leagues-Stats')
+    gsc = get_gsc(f'https://fbref.com/en/comps/Big5/{season}/gca/players/{season}-Big-5-European-Leagues-Stats')
+    defense = get_defensive_action(f'https://fbref.com/en/comps/Big5/{season}/defense/players/{season}-Big-5-European-Leagues-Stats')
+    possession = get_possession(f'https://fbref.com/en/comps/Big5/{season}/possession/players/{season}-Big-5-European-Leagues-Stats')
+    playing_time = get_playing_time(f'https://fbref.com/en/comps/Big5/{season}/playingtime/players/{season}-Big-5-European-Leagues-Stats')
+    misc = get_misc(f'https://fbref.com/en/comps/Big5/{season}/misc/players/{season}-Big-5-European-Leagues-Stats')
+
+    playing_time.drop(playing_time.loc[playing_time['Matches Played'] == '0'].index, inplace=True)
+    playing_time['Rk']= playing_time.reset_index().index + 1
+
+    df = pd.merge(standard, shooting, on='Rk', suffixes=('', '_remove')).merge(passing, on='Rk', suffixes=('', '_remove')).merge(pass_types, on='Rk', suffixes=('', '_remove')).merge(gsc, on='Rk', suffixes=('', '_remove')).merge(defense, on='Rk', suffixes=('', '_remove')).merge(possession, on='Rk', suffixes=('', '_remove')).merge(misc, on='Rk', suffixes=('', '_remove')).merge(playing_time, on='Rk', suffixes=('', '_remove'))
+    
+    df.drop([i for i in df.columns if 'remove' in i or i == 'Matches'],
+               axis=1, inplace=True)
+
+    for col in df.columns:
+      if col in ['Rk', 'Player', 'Nation', 'Pos', 'Squad', 'Comp']:
+        pass
+      elif col in ['Age', 'Born', 'Matches Played', 'Starts', 'Minutes', 'Minutes per Match', 'Minutes per Start']:
+        df[col] = df[col].astype('int64')
+      else:
+        df[col] = df[col].astype('float64')
+
+    df['Turnover'] = (df['Attempted Passes Total'] - df['Completed Passes Total']) + df['Dispossessed'] + df['TakeOns Tackled'] + df['Miscontrols']
+    df['Turnover%'] = round((df['Turnover'] / df['Touches']) * 100, 2)
+    df['Turnover/90'] = round(df['Turnover'] / df['90s'], 2)
+    df['Season'] = season
+    return df
