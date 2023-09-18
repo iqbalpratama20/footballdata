@@ -282,23 +282,7 @@ def combine_df(standard: pd.DataFrame, shooting: pd.DataFrame, passing: pd.DataF
     df.drop([i for i in df.columns if 'remove' in i or i == 'Matches'],
                axis=1, inplace=True)
 
-    if season == '2023-2024':
-        df['Age'] = df['Age'].apply(lambda x: x.split('-')[0])
-        
-    for col in df.columns:
-      if col in ['Rk', 'Player', 'Nation', 'Pos', 'Squad', 'Comp']:
-        pass
-      elif col in ['Age', 'Born', 'Matches Played', 'Starts', 'Minutes', 'Minutes per Match', 'Minutes per Start']:
-        df[col] = df[col].apply(lambda x: x.replace(',', ''))
-        df[col] = df[col].astype('int64')
-      else:
-        df[col] = df[col].apply(lambda x: x.replace(',', ''))
-        df[col] = df[col].astype('float64')
-
-    df['Turnover'] = (df['Attempted Passes Total'] - df['Completed Passes Total']) + df['Dispossessed'] + df['TakeOns Tackled'] + df['Miscontrols']
-    df['Turnover%'] = round((df['Turnover'] / df['Touches']) * 100, 2)
-    df['Turnover/90'] = round(df['Turnover'] / df['90s'], 2)
-    df['Season'] = season
+    df = cast_column(season=season, df=df, big5=False)
     return df
 
 def get_big5_combined(season: str) -> pd.DataFrame:
@@ -320,19 +304,37 @@ def get_big5_combined(season: str) -> pd.DataFrame:
     df.drop([i for i in df.columns if 'remove' in i or i == 'Matches'],
                axis=1, inplace=True)
 
+    df = cast_column(season=season, df=df)
+
+    return df
+
+def cast_column(season: str, df: pd.DataFrame, big5: bool = True) -> pd.DataFrame:
+    
     if season == '2023-2024':
-        df['Age'] = df['Age'].apply(lambda x: x.split('-')[0])
-        
-    for col in df.columns:
-      if col in ['Rk', 'Player', 'Nation', 'Pos', 'Squad', 'Comp']:
-        pass
-      elif col in ['Age', 'Born', 'Matches Played', 'Starts', 'Minutes', 'Minutes per Match', 'Minutes per Start']:
-        df[col] = df[col].astype('int64')
-      else:
-        df[col] = df[col].astype('float64')
+            df['Age'] = df['Age'].apply(lambda x: x.split('-')[0])
+
+    if big5:
+        for col in df.columns:
+            if col in ['Rk', 'Player', 'Nation', 'Pos', 'Squad', 'Comp']:
+                pass
+            elif col in ['Age', 'Born', 'Matches Played', 'Starts', 'Minutes', 'Minutes per Match', 'Minutes per Start']:
+                df[col] = df[col].astype('int64')
+            else:
+                df[col] = df[col].astype('float64')
+    else:
+        for col in df.columns:
+            if col in ['Rk', 'Player', 'Nation', 'Pos', 'Squad', 'Comp']:
+                pass
+            elif col in ['Age', 'Born', 'Matches Played', 'Starts', 'Minutes', 'Minutes per Match', 'Minutes per Start']:
+                df[col] = df[col].apply(lambda x: x.replace(',', ''))
+                df[col] = df[col].astype('int64')
+            else:
+                df[col] = df[col].apply(lambda x: x.replace(',', ''))
+                df[col] = df[col].astype('float64')
 
     df['Turnover'] = (df['Attempted Passes Total'] - df['Completed Passes Total']) + df['Dispossessed'] + df['TakeOns Tackled'] + df['Miscontrols']
     df['Turnover%'] = round((df['Turnover'] / df['Touches']) * 100, 2)
     df['Turnover/90'] = round(df['Turnover'] / df['90s'], 2)
     df['Season'] = season
     return df
+
