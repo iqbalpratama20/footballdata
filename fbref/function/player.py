@@ -69,6 +69,79 @@ def clean_df(df: pd.DataFrame) -> pd.DataFrame:
     df.fillna('0', inplace=True)
     return df
 
+def get_stats(url: str, category: str, comp: str = None) -> pd.DataFrame:
+    cat_dict = {'standard': "stats_standard", 'shooting': "stats_shooting", 'passing': "stats_passing",
+                'passing_type': "stats_passing_types", 'gca': "stats_gca", 'defense': "stats_defense",
+                'possession': "stats_possession", 'playing_time': "stats_playing_time", 'misc': "stats_misc"}
+    
+    if category == 'standard':
+        columns = ['Player', 'Nation','Pos','Squad','Age','Born','MP','Starts','Min','90s','Gls','Ast','G+A','G-PK','PK','PKatt',
+           'CrdY','CrdR','xG','npxG','xAG','npxG+xAG','PrgC','PrgP','PrgR','Gls/90','Ast/90',
+           'G+A/90','G-PK/90','G+A-PK/90','xG/90','xAG/90','xG+xAG/90','npxG/90','npxG+xAG/90','Matches']
+    elif category == 'shooting':
+        columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
+       'Gls', 'Sh', 'SoT', 'SoT%', 'Sh/90', 'SoT/90', 'G/Sh', 'G/SoT', 'Dist',
+       'FK', 'PK', 'PKatt', 'xG', 'npxG', 'npxG/Sh', 'G-xG', 'np:G-xG', 'Matches']
+    elif category == 'passing':
+        columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
+       'Completed Passes Total', 'Attempted Passes Total', 'Completed Passes Total%', 
+       'Total Passing Distance', 'Progressive Passing Distance', 'Completed Short Passes', 
+       'Attempted Short Passes', 'Completed Short Passes%', 'Completed Medium Passes', 'Attempted Medium Passes', 
+       'Completed Medium Passes%', 'Completed Long Passes', 'Attempted Long Passes', 'Completed Long Passes%', 
+       'Ast', 'xAG', 'xA', 'A-xAG', 'Key Passes', 'Passes Into Final 3rd', 'Passes Into Pen Area', 
+       'Crossing Into Pen Area', 'Progressive Passes', 'Matches']
+    elif category == 'passing_type':
+        columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
+       'Att', 'Live', 'Dead', 'FK', 'TB', 'Sw', 'Crs', 'TI', 'CK', 'In', 'Out',
+       'Str', 'Cmp', 'Off', 'Blocks', 'Matches']
+    elif category == 'gca':
+        columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
+               'SCA', 'SCA90', 'SCAPassLive', 'SCAPassDead', 'SCATakeOns',
+               'SCAShot', 'SCAFouled', 'SCADefAct', 'GCA', 'GCA90', 'GCAPassLive',
+               'GCAPassDead', 'GCATakeOns', 'GCAShot', 'GCAFouled', 'GCADefAct', 'Matches']
+    elif category == 'defense':
+        columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
+               'Tackles', 'Tackles Won', 'Def 3rd Tackles', 'Mid 3rd Tackles',
+               'Att 3rd Tackles', 'Dribblers Tackled', 'Dribbles Challenged',
+               'Dribbles Challenged%', 'Challenges Lost', 'Blocks', 'Shots Blocked', 
+               'Pass Blocked', 'Interceptions', 'Interceptions+Tackles', 'Clearances', 'Errors', 'Matches']
+    elif category == 'possession':
+        columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
+               'Touches', 'Def Pen Touches', 'Def 3rd Touches', 'Mid 3rd Touches',
+               'Att 3rd Touches', 'Att Pen Touches', 'Live Touches', 'TakeOns Attempted',
+               'Successful TakeOns', 'Successful TakeOns%', 'TakeOns Tackled', 'TakeOns Tackled %', 
+               'Carries', 'Total Carries Distance', 'Progressive Carries Distance', 'Progressive Carries',
+               'Carries to Final Third', 'Carries to Pen Area', 'Miscontrols', 'Dispossessed', 
+               'Passes Received', 'Progressive Passes Received', 'Matches']
+    elif category == 'playing_time':
+        columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born',
+               'Matches Played', 'Minutes', 'Minutes per Match', 'Minutes%', '90s',
+               'Starts', 'Minutes per Start', 'Complete Match', 'Subs', 'Minutes per Subs',
+               'Unused Subs', 'PPM', 'onG', 'onGA', 'G+/-', 'G+/-90', 'On-Off', 'onxG', 'onxGA',
+               'xG+/-', 'xG+/-90', 'xGOn-Off', 'Matches']
+    elif category == 'misc':
+        columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
+               'Yellow Card', 'Red Card', '2nd Yellow', 'Fouls', 'Fouled',
+               'Offsides', 'Crosses', 'Interceptions', 'Tackles Won', 'Pen Won',
+               'Pen Conceded', 'Own Goals', 'Recoveries', 'Aerial Won', 'Aerial Lost', 
+               'Aerial Won%', 'Matches']
+    else:
+        return None
+    
+    print(cat_dict[category])
+    
+    if comp:
+        df = scraping(url, cat_dict[category], comp, columns)
+        columns.insert(0, 'Rk')
+        columns.insert(5, 'Comp')
+        return df[columns]
+    else:
+        df = clean_df(pd.read_html(url)[0])
+        columns.insert(0, 'Rk')
+        columns.insert(5, 'Comp')
+        df.columns = columns
+        return df
+
 def get_standard_stats(url: str, comp: str = None) -> pd.DataFrame:
     columns = ['Player', 'Nation','Pos','Squad','Age','Born','MP','Starts','Min','90s','Gls','Ast','G+A','G-PK','PK','PKatt',
            'CrdY','CrdR','xG','npxG','xAG','npxG+xAG','PrgC','PrgP','PrgR','Gls/90','Ast/90',
