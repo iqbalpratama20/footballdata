@@ -3,7 +3,8 @@ import pandas as pd
 def custom_profile(df: pd.DataFrame, columns: list, position: str = None,
                    age_min: int = 16, age_max: int = 45, minutes: int = 0) -> pd.DataFrame:
     
-    df = df.loc[(df['Pos'] == position) & (df['Age'] >= age_min) & (df['Age'] <= age_max) & (df['Minutes'] >= minutes)][columns].copy()
+    df = df.loc[(df['Pos'] == position) & (df['Age'] >= age_min) 
+                & (df['Age'] <= age_max) & (df['Minutes'] >= minutes)][columns].copy(dep=True)
     for col in df.columns:
       if col in ['Player', 'Age', 'Pos', 'Squad']:
         pass

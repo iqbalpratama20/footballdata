@@ -92,64 +92,62 @@ def get_stats(url: str, category: str, comp: str = None) -> pd.DataFrame:
                 'possession': "stats_possession", 'playing_time': "stats_playing_time", 'misc': "stats_misc"}
     
     if category == 'standard':
-        columns = ['Player', 'Nation','Pos','Squad','Age','Born','MP','Starts','Min','90s','Gls','Ast','G+A','G-PK','PK','PKatt',
-           'CrdY','CrdR','xG','npxG','xAG','npxG+xAG','PrgC','PrgP','PrgR','Gls/90','Ast/90',
-           'G+A/90','G-PK/90','G+A-PK/90','xG/90','xAG/90','xG+xAG/90','npxG/90','npxG+xAG/90','Matches']
+        columns = ['Player', 'Nation','Position','Squad','Age','Born','Match Played','Starts','Minutes','90s',
+                   'Goals','Assists','G+A','Non Penalty Goals','Penalty Goals','Penalty Attempted', 'Yellow Cards',
+                   'Red Cards','xG','npxG','xAG','npxG+xAG','Progressive Carries','Progressive Passes', 
+                   'Progressive Passes Received','Goals/90','Assists/90', 'G+A/90','Non Penalty Goals/90',
+                   'Non Penalty G+A/90','xG/90','xAG/90','xG+xAG/90','npxG/90','npxG+xAG/90','Matches']
         
     elif category == 'shooting':
-        columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
-       'Gls', 'Sh', 'SoT', 'SoT%', 'Sh/90', 'SoT/90', 'G/Sh', 'G/SoT', 'Dist',
-       'FK', 'PK', 'PKatt', 'xG', 'npxG', 'npxG/Sh', 'G-xG', 'np:G-xG', 'Matches']
+        columns = ['Player', 'Nation', 'Position', 'Squad', 'Age', 'Born', '90s', 'Goals', 'Shots', 
+                   'Shots on Target', 'Shots on Target %', 'Shots/90', 'Shots on Target/90', 'Goals/Shot', 
+                   'Goals/Shot on Target', 'Average Shot Distance', 'Free Kicks', 'Penalty Goals', 'Penalty Attempted', 
+                   'xG', 'npxG', 'npxG/Shot', 'Goals - xG', 'Non Penalty Goals - npxG', 'Matches']
         
     elif category == 'passing':
-        columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
-       'Completed Passes Total', 'Attempted Passes Total', 'Completed Passes Total%', 
-       'Total Passing Distance', 'Progressive Passing Distance', 'Completed Short Passes', 
-       'Attempted Short Passes', 'Completed Short Passes%', 'Completed Medium Passes', 'Attempted Medium Passes', 
-       'Completed Medium Passes%', 'Completed Long Passes', 'Attempted Long Passes', 'Completed Long Passes%', 
-       'Ast', 'xAG', 'xA', 'A-xAG', 'Key Passes', 'Passes Into Final 3rd', 'Passes Into Pen Area', 
-       'Crossing Into Pen Area', 'Progressive Passes', 'Matches']
+        columns = ['Player', 'Nation', 'Position', 'Squad', 'Age', 'Born', '90s','Completed Passes Total', 
+                   'Attempted Passes Total', 'Completed Passes Total%', 'Total Passing Distance', 
+                   'Progressive Passing Distance', 'Completed Short Passes', 'Attempted Short Passes', 
+                   'Completed Short Passes%', 'Completed Medium Passes', 'Attempted Medium Passes', 
+                   'Completed Medium Passes%', 'Completed Long Passes', 'Attempted Long Passes', 'Completed Long Passes%', 
+                   'Assists', 'xAG', 'xA', 'A-xAG', 'Key Passes', 'Passes Into Final 3rd', 'Passes Into Pen Area', 
+                   'Crossing Into Pen Area', 'Progressive Passes', 'Matches']
         
     elif category == 'passing_type':
-        columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
-       'Att', 'Live', 'Dead', 'FK', 'TB', 'Sw', 'Crs', 'TI', 'CK', 'In', 'Out',
-       'Str', 'Cmp', 'Off', 'Blocks', 'Matches']
+        columns = ['Player', 'Nation', 'Position', 'Squad', 'Age', 'Born', '90s', 'Attempted Passes Total', 
+                   'Live Ball Passes', 'Dead Ball Passes', 'Free Kicks Passes', 'Through Balls', 'Switches', 
+                   'Crosses', 'Throw Ins', 'Corner Kicks', 'Inswinging Corner', 'Outswinging Corner', 
+                   'Straight Corner', 'Completed Passes Total', 'Passes Offside', 'Passes Blocked', 'Matches']
         
     elif category == 'gca':
-        columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
-               'SCA', 'SCA90', 'SCAPassLive', 'SCAPassDead', 'SCATakeOns',
-               'SCAShot', 'SCAFouled', 'SCADefAct', 'GCA', 'GCA90', 'GCAPassLive',
-               'GCAPassDead', 'GCATakeOns', 'GCAShot', 'GCAFouled', 'GCADefAct', 'Matches']
+        columns = ['Player', 'Nation', 'Position', 'Squad', 'Age', 'Born', '90s', 'SCA', 'SCA90', 'SCAPassLive', 
+                   'SCAPassDead', 'SCATakeOns', 'SCAShot', 'SCAFouled', 'SCADefAct', 'GCA', 'GCA90', 'GCAPassLive', 
+                   'GCAPassDead', 'GCATakeOns', 'GCAShot', 'GCAFouled', 'GCADefAct', 'Matches']
         
     elif category == 'defense':
-        columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
-               'Tackles', 'Tackles Won', 'Def 3rd Tackles', 'Mid 3rd Tackles',
-               'Att 3rd Tackles', 'Dribblers Tackled', 'Dribbles Challenged',
-               'Dribbles Challenged%', 'Challenges Lost', 'Blocks', 'Shots Blocked', 
-               'Pass Blocked', 'Interceptions', 'Interceptions+Tackles', 'Clearances', 'Errors', 'Matches']
+        columns = ['Player', 'Nation', 'Position', 'Squad', 'Age', 'Born', '90s','Tackles', 'Tackles Won', 
+                   'Def 3rd Tackles', 'Mid 3rd Tackles', 'Att 3rd Tackles', 'Dribblers Tackled', 'Dribbles Challenged', 
+                   'Dribbles Challenged%', 'Challenges Lost', 'Blocks', 'Shots Blocked', 'Pass Blocked', 'Interceptions', 
+                   'Interceptions+Tackles', 'Clearances', 'Errors', 'Matches']
         
     elif category == 'possession':
-        columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
-               'Touches', 'Def Pen Touches', 'Def 3rd Touches', 'Mid 3rd Touches',
-               'Att 3rd Touches', 'Att Pen Touches', 'Live Touches', 'TakeOns Attempted',
-               'Successful TakeOns', 'Successful TakeOns%', 'TakeOns Tackled', 'TakeOns Tackled %', 
-               'Carries', 'Total Carries Distance', 'Progressive Carries Distance', 'Progressive Carries',
-               'Carries to Final Third', 'Carries to Pen Area', 'Miscontrols', 'Dispossessed', 
-               'Passes Received', 'Progressive Passes Received', 'Matches']
+        columns = ['Player', 'Nation', 'Position', 'Squad', 'Age', 'Born', '90s', 'Touches', 'Def Pen Touches', 
+                   'Def 3rd Touches', 'Mid 3rd Touches', 'Att 3rd Touches', 'Att Pen Touches', 'Live Touches', 
+                   'TakeOns Attempted', 'Successful TakeOns', 'Successful TakeOns%', 'TakeOns Tackled', 
+                   'TakeOns Tackled %', 'Carries', 'Total Carries Distance', 'Progressive Carries Distance', 
+                   'Progressive Carries', 'Carries to Final Third', 'Carries to Pen Area', 'Miscontrols', 'Dispossessed', 
+                   'Passes Received', 'Progressive Passes Received', 'Matches']
         
     elif category == 'playing_time':
-        columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born',
-               'Matches Played', 'Minutes', 'Minutes per Match', 'Minutes%', '90s',
-               'Starts', 'Minutes per Start', 'Complete Match', 'Subs', 'Minutes per Subs',
-               'Unused Subs', 'PPM', 'onG', 'onGA', 'G+/-', 'G+/-90', 'On-Off', 'onxG', 'onxGA',
-               'xG+/-', 'xG+/-90', 'xGOn-Off', 'Matches']
+        columns = ['Player', 'Nation', 'Position', 'Squad', 'Age', 'Born', 'Matches Played', 'Minutes', 
+                   'Minutes per Match', 'Minutes%', '90s', 'Starts', 'Minutes per Start', 'Complete Match', 
+                   'Subs', 'Minutes per Subs', 'Unused Subs', 'PPM', 'onG', 'onGA', 'G+/-', 'G+/-90', 'On-Off', 
+                   'onxG', 'onxGA', 'xG+/-', 'xG+/-90', 'xGOn-Off', 'Matches']
         
     elif category == 'misc':
-        columns = ['Player', 'Nation', 'Pos', 'Squad', 'Age', 'Born', '90s',
-               'Yellow Card', 'Red Card', '2nd Yellow', 'Fouls', 'Fouled',
-               'Offsides', 'Crosses', 'Interceptions', 'Tackles Won', 'Pen Won',
-               'Pen Conceded', 'Own Goals', 'Recoveries', 'Aerial Won', 'Aerial Lost', 
-               'Aerial Won%', 'Matches']
+        columns = ['Player', 'Nation', 'Position', 'Squad', 'Age', 'Born', '90s', 'Yellow Cards', 'Red Cards', 
+                   '2nd Yellow', 'Fouls', 'Fouled', 'Offsides', 'Crosses', 'Interceptions', 'Tackles Won', 'Pen Won', 
+                   'Pen Conceded', 'Own Goals', 'Recoveries', 'Aerial Won', 'Aerial Lost', 'Aerial Won%', 'Matches']
     else:
         return None
     
@@ -234,15 +232,29 @@ def cast_column(season: str, df: pd.DataFrame, big5: bool = True) -> pd.DataFram
     return df
 
 def get_per_90(df: pd.DataFrame) -> pd.DataFrame:
+    """ Converting eligible columns into per 90 basis
+
+    Parameters
+    ----------
+    df  : pd.DataFrame
+        Source DataFrame to be converted
     
+    Returns
+    New DataFrame with eligible columns converted into per 90 basis  
+    """
+    
+    # Making a deep copy so the function will not affect to original DataFrame
     df = df.copy(deep=True)
 
     for col in df.columns:
+        # Excluding the following columns for conversion
         if col in ['Rk', 'Player', 'Nation', 'Pos', 'Squad', 'Comp', 'Age', 
                    'Born', 'Match Played', 'Starts', 'Minutes', 'Season']:
             pass
+        # Excluding columns which already in per 90 basis
         elif '90' in col:
             pass
+        # Converting the remaining columns with 2 points rounding
         else:
             df[col] = round(df[col] / df['90s'], 2)
     
