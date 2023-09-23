@@ -1,28 +1,61 @@
 import pandas as pd
 
 LEAGUES = {'Eredivisie': ['23', 'Eredivisie'],
-           'Primeira Liga': ['32', 'Primerira-Liga']}
+           'Primeira Liga': ['32', 'Primerira-Liga'],
+           'MLS': ['22', 'Major-League-Soccer'], 
+           'Championship': ['10', 'Championship'],
+           'Brasil': ['24', 'Serie-A'],
+           'Liga MX': ['31', 'Liga-MX'],
+           'Primera Division': ['21', 'Primera-Division'],
+           'Belgian Pro Leage': ['37', 'Belgian-Pro-League'],
+           'Segunda': ['17', 'Segunda-Division'],
+           'Serie B': ['18', 'Serie-B'],
+           'Bundesliga 2': ['33', '2-Bundesliga'],
+           'Ligue 2': ['60', 'Ligue-2'],
+           'Big 5': ['Big5', 'Big-5-European-League']}
 
 def clean_df(df: pd.DataFrame) -> pd.DataFrame:
     
     df = df.droplevel(level=0, axis=1)
     return df
 
-def get_for_stats(league: str, season: str, category: str = None) -> pd.DataFrame:
+def clean_big5_df(df: pd.DataFrame) -> pd.DataFrame:
     
-    standard = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/stats/{season}-{LEAGUES[league][1]}-Stats')[0]
-    shooting = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/shooting/{season}-{LEAGUES[league][1]}-Stats')[0]
-    passing = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/passing/{season}-{LEAGUES[league][1]}-Stats')[0]
-    pass_type = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/passing_types/{season}-{LEAGUES[league][1]}-Stats')[0]
-    gca = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/gca/{season}-{LEAGUES[league][1]}-Stats')[0]
-    defense = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/defense/{season}-{LEAGUES[league][1]}-Stats')[0]
-    possession = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/possession/{season}-{LEAGUES[league][1]}-Stats')[0]
-    playing_time = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/playingtime/{season}-{LEAGUES[league][1]}-Stats')[0]
-    misc = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/misc/{season}-{LEAGUES[league][1]}-Stats')[0]
+    df = df.droplevel(level=0, axis=1)
+    df.drop(['Rk', 'Comp'], axis=1, inplace=True)
+    return df
 
-    standard, shooting, passing, pass_type, gca, defense, possession, playing_time, misc = (df.pipe(clean_df) for df in [standard, shooting, passing, pass_type, 
-                                                                                                                         gca, defense, possession, playing_time, misc])
+def get_for_stats(league: str, season: str, category: str = None, big5: bool = False) -> pd.DataFrame:
     
+    if league == 'Big 5':
+        standard = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/stats/squads/{season}-{LEAGUES[league][1]}-Stats')[0]
+        shooting = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/shooting/squads/{season}-{LEAGUES[league][1]}-Stats')[0]
+        passing = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/passing/squads/{season}-{LEAGUES[league][1]}-Stats')[0]
+        pass_type = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/passing_types/squads/{season}-{LEAGUES[league][1]}-Stats')[0]
+        gca = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/gca/squads/{season}-{LEAGUES[league][1]}-Stats')[0]
+        defense = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/defense/squads/{season}-{LEAGUES[league][1]}-Stats')[0]
+        possession = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/possession/squads/{season}-{LEAGUES[league][1]}-Stats')[0]
+        playing_time = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/playingtime/squads/{season}-{LEAGUES[league][1]}-Stats')[0]
+        misc = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/misc/squads/{season}-{LEAGUES[league][1]}-Stats')[0]
+
+        standard, shooting, passing, pass_type, gca, defense, possession, playing_time, misc = (df.pipe(clean_big5_df) for df in [standard, shooting, passing, pass_type, 
+                                                                                                                            gca, defense, possession, playing_time, misc])
+        
+        
+    else:
+        standard = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/stats/{season}-{LEAGUES[league][1]}-Stats')[0]
+        shooting = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/shooting/{season}-{LEAGUES[league][1]}-Stats')[0]
+        passing = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/passing/{season}-{LEAGUES[league][1]}-Stats')[0]
+        pass_type = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/passing_types/{season}-{LEAGUES[league][1]}-Stats')[0]
+        gca = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/gca/{season}-{LEAGUES[league][1]}-Stats')[0]
+        defense = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/defense/{season}-{LEAGUES[league][1]}-Stats')[0]
+        possession = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/possession/{season}-{LEAGUES[league][1]}-Stats')[0]
+        playing_time = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/playingtime/{season}-{LEAGUES[league][1]}-Stats')[0]
+        misc = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/misc/{season}-{LEAGUES[league][1]}-Stats')[0]
+
+        standard, shooting, passing, pass_type, gca, defense, possession, playing_time, misc = (df.pipe(clean_df) for df in [standard, shooting, passing, pass_type, 
+                                                                                                                            gca, defense, possession, playing_time, misc])
+        
     columns = ['Squad', '# Player', 'Age', 'Possession', 'Match Played', 'Starts', 'Minutes', '90s', 'Goals',
                'Assists', 'G+A', 'Non Penalty Goals', 'Penalty Goals', 'Penalty Attempted', 'Yellow Cards',
                'Red Cards', 'xG', 'npxG', 'xAG', 'npxG+xAG', 'Progressive Carries', 'Progressive Passes', 
@@ -107,26 +140,41 @@ def get_for_stats(league: str, season: str, category: str = None) -> pd.DataFram
                axis=1, inplace=True)
     df.drop(['# Player', 'Match Played', 'Minutes', 'Starts'], axis=1, inplace=True)
 
-    new_columns = ['Squad ' + col for col in df.columns]
+    new_columns = ['Squad ' + col if col != 'Squad' else col for col in df.columns ]
     df.columns = new_columns
     
     return df
 
 def get_opponent_stats(league: str, season: str, category: str = None) -> pd.DataFrame:
-    
-    standard = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/stats/{season}-{LEAGUES[league][1]}-Stats')[1]
-    shooting = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/shooting/{season}-{LEAGUES[league][1]}-Stats')[1]
-    passing = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/passing/{season}-{LEAGUES[league][1]}-Stats')[1]
-    pass_type = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/passing_types/{season}-{LEAGUES[league][1]}-Stats')[1]
-    gca = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/gca/{season}-{LEAGUES[league][1]}-Stats')[1]
-    defense = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/defense/{season}-{LEAGUES[league][1]}-Stats')[1]
-    possession = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/possession/{season}-{LEAGUES[league][1]}-Stats')[1]
-    playing_time = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/playingtime/{season}-{LEAGUES[league][1]}-Stats')[1]
-    misc = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/misc/{season}-{LEAGUES[league][1]}-Stats')[1]
 
-    standard, shooting, passing, pass_type, gca, defense, possession, playing_time, misc = (df.pipe(clean_df) for df in [standard, shooting, passing, pass_type, 
-                                                                                                                         gca, defense, possession, playing_time, misc])
+    if league == 'Big 5':
+        standard = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/stats/squads/{season}-{LEAGUES[league][1]}-Stats')[1]
+        shooting = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/shooting/squads/{season}-{LEAGUES[league][1]}-Stats')[1]
+        passing = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/passing/squads/{season}-{LEAGUES[league][1]}-Stats')[1]
+        pass_type = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/passing_types/squads/{season}-{LEAGUES[league][1]}-Stats')[1]
+        gca = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/gca/squads/{season}-{LEAGUES[league][1]}-Stats')[1]
+        defense = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/defense/squads/{season}-{LEAGUES[league][1]}-Stats')[1]
+        possession = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/possession/squads/{season}-{LEAGUES[league][1]}-Stats')[1]
+        playing_time = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/playingtime/squads/{season}-{LEAGUES[league][1]}-Stats')[1]
+        misc = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/misc/squads/{season}-{LEAGUES[league][1]}-Stats')[1]
+
+        standard, shooting, passing, pass_type, gca, defense, possession, playing_time, misc = (df.pipe(clean_big5_df) for df in [standard, shooting, passing, pass_type, 
+                                                                                                                            gca, defense, possession, playing_time, misc])
     
+    else:
+        standard = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/stats/{season}-{LEAGUES[league][1]}-Stats')[1]
+        shooting = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/shooting/{season}-{LEAGUES[league][1]}-Stats')[1]
+        passing = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/passing/{season}-{LEAGUES[league][1]}-Stats')[1]
+        pass_type = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/passing_types/{season}-{LEAGUES[league][1]}-Stats')[1]
+        gca = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/gca/{season}-{LEAGUES[league][1]}-Stats')[1]
+        defense = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/defense/{season}-{LEAGUES[league][1]}-Stats')[1]
+        possession = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/possession/{season}-{LEAGUES[league][1]}-Stats')[1]
+        playing_time = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/playingtime/{season}-{LEAGUES[league][1]}-Stats')[1]
+        misc = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/misc/{season}-{LEAGUES[league][1]}-Stats')[1]
+
+        standard, shooting, passing, pass_type, gca, defense, possession, playing_time, misc = (df.pipe(clean_df) for df in [standard, shooting, passing, pass_type, 
+                                                                                                                            gca, defense, possession, playing_time, misc])
+        
     columns = ['Squad', '# Player', 'Age', 'Possession', 'Match Played', 'Starts', 'Minutes', '90s', 'Goals',
                'Assists', 'G+A', 'Non Penalty Goals', 'Penalty Goals', 'Penalty Attempted', 'Yellow Cards',
                'Red Cards', 'xG', 'npxG', 'xAG', 'npxG+xAG', 'Progressive Carries', 'Progressive Passes', 
@@ -213,7 +261,7 @@ def get_opponent_stats(league: str, season: str, category: str = None) -> pd.Dat
                axis=1, inplace=True)
     df.drop(['# Player', 'Match Played', 'Minutes', 'Starts'], axis=1, inplace=True)
 
-    new_columns = ['Opponent ' + col for col in df.columns]
+    new_columns = ['Opponent ' + col if col != 'Squad' else col for col in df.columns]
     df.columns = new_columns
     
     return df
