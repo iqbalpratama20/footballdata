@@ -4,6 +4,20 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import numpy as np
 
+LEAGUES = {'Eredivisie': ['23', 'Eredivisie'],
+           'Primeira Liga': ['32', 'Primerira-Liga'],
+           'MLS': ['22', 'Major-League-Soccer'], 
+           'Championship': ['10', 'Championship'],
+           'Brasil': ['24', 'Serie-A'],
+           'Liga MX': ['31', 'Liga-MX'],
+           'Primera Division': ['21', 'Primera-Division'],
+           'Belgian Pro Leage': ['37', 'Belgian-Pro-League'],
+           'Segunda': ['17', 'Segunda-Division'],
+           'Serie B': ['18', 'Serie-B'],
+           'Bundesliga 2': ['33', '2-Bundesliga'],
+           'Ligue 2': ['60', 'Ligue-2'],
+           'Big 5': ['Big5', 'Big-5-European-League']}
+
 def scraping(url: str, id: str, comp: str, columns: list) -> pd.DataFrame:
     """ Scrape dataframe from given url for non big 5 Leagues
 
@@ -69,7 +83,7 @@ def clean_df(df: pd.DataFrame) -> pd.DataFrame:
     df.fillna('0', inplace=True)
     return df
 
-def get_stats(url: str, category: str, comp: str = None) -> pd.DataFrame:
+def get_stats(league: str, category: str, season: str) -> pd.DataFrame:
     """ Get individul stats from given fbref url. 
 
     Parameters
@@ -88,11 +102,11 @@ def get_stats(url: str, category: str, comp: str = None) -> pd.DataFrame:
     """
 
     cat_dict = {'standard': "stats_standard", 'shooting': "stats_shooting", 'passing': "stats_passing",
-                'passing_type': "stats_passing_types", 'gca': "stats_gca", 'defense': "stats_defense",
-                'possession': "stats_possession", 'playing_time': "stats_playing_time", 'misc': "stats_misc"}
+                'passing_types': "stats_passing_types", 'gca': "stats_gca", 'defense': "stats_defense",
+                'possession': "stats_possession", 'playingtime': "stats_playing_time", 'misc': "stats_misc"}
     
     if category == 'standard':
-        columns = ['Player', 'Nation','Position','Squad','Age','Born','Match Played','Starts','Minutes','90s',
+        columns = ['Player', 'Nation','Position','Squad','Age','Born','Matches Played','Starts','Minutes','90s',
                    'Goals','Assists','G+A','Non Penalty Goals','Penalty Goals','Penalty Attempted', 'Yellow Cards',
                    'Red Cards','xG','npxG','xAG','npxG+xAG','Progressive Carries','Progressive Passes', 
                    'Progressive Passes Received','Goals/90','Assists/90', 'G+A/90','Non Penalty Goals/90',
@@ -113,7 +127,7 @@ def get_stats(url: str, category: str, comp: str = None) -> pd.DataFrame:
                    'Assists', 'xAG', 'xA', 'A-xAG', 'Key Passes', 'Passes Into Final 3rd', 'Passes Into Pen Area', 
                    'Crossing Into Pen Area', 'Progressive Passes', 'Matches']
         
-    elif category == 'passing_type':
+    elif category == 'passing_types':
         columns = ['Player', 'Nation', 'Position', 'Squad', 'Age', 'Born', '90s', 'Attempted Passes Total', 
                    'Live Ball Passes', 'Dead Ball Passes', 'Free Kicks Passes', 'Through Balls', 'Switches', 
                    'Crosses', 'Throw Ins', 'Corner Kicks', 'Inswinging Corner', 'Outswinging Corner', 
@@ -138,7 +152,7 @@ def get_stats(url: str, category: str, comp: str = None) -> pd.DataFrame:
                    'Progressive Carries', 'Carries to Final Third', 'Carries to Pen Area', 'Miscontrols', 'Dispossessed', 
                    'Passes Received', 'Progressive Passes Received', 'Matches']
         
-    elif category == 'playing_time':
+    elif category == 'playingtime':
         columns = ['Player', 'Nation', 'Position', 'Squad', 'Age', 'Born', 'Matches Played', 'Minutes', 
                    'Minutes per Match', 'Minutes%', '90s', 'Starts', 'Minutes per Start', 'Complete Match', 
                    'Subs', 'Minutes per Subs', 'Unused Subs', 'PPM', 'onG', 'onGA', 'G+/-', 'G+/-90', 'On-Off', 
@@ -150,13 +164,21 @@ def get_stats(url: str, category: str, comp: str = None) -> pd.DataFrame:
                    'Pen Conceded', 'Own Goals', 'Recoveries', 'Aerial Won', 'Aerial Lost', 'Aerial Won%', 'Matches']
     else:
         return None
-    
-    if comp:
-        df = scraping(url, cat_dict[category], comp, columns)
+
+    if league != 'Big 5':
+        if category == 'standard':
+            url = f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/stats/{season}-{LEAGUES[league][1]}-Stats'
+        else:    
+            url = f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/{category}/{season}-{LEAGUES[league][1]}-Stats'
+        df = scraping(url, cat_dict[category], league, columns)
         columns.insert(0, 'Rk')
         columns.insert(5, 'Comp')
         return df[columns]
     else:
+        if category == 'standard':
+            url = f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/stats/players/{season}-{LEAGUES[league][1]}-Stats'
+        else:
+            url = f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/{category}/players/{season}-{LEAGUES[league][1]}-Stats'
         df = clean_df(pd.read_html(url)[0])
         columns.insert(0, 'Rk')
         columns.insert(5, 'Comp')
@@ -179,15 +201,15 @@ def combine_df(standard: pd.DataFrame, shooting: pd.DataFrame, passing: pd.DataF
     return df
 
 def get_big5_combined(season: str) -> pd.DataFrame:
-    standard = get_stats(f'https://fbref.com/en/comps/Big5/{season}/stats/players/{season}-Big-5-European-Leagues-Stats', category='standard')
-    shooting = get_stats(f'https://fbref.com/en/comps/Big5/{season}/shooting/players/{season}-Big-5-European-Leagues-Stats', category='shooting')
-    passing = get_stats(f'https://fbref.com/en/comps/Big5/{season}/passing/players/{season}-Big-5-European-Leagues-Stats', category='passing')
-    pass_types = get_stats(f'https://fbref.com/en/comps/Big5/{season}/passing_types/players/{season}-Big-5-European-Leagues-Stats', category='passing_type')
-    gca = get_stats(f'https://fbref.com/en/comps/Big5/{season}/gca/players/{season}-Big-5-European-Leagues-Stats', category='gca')
-    defense = get_stats(f'https://fbref.com/en/comps/Big5/{season}/defense/players/{season}-Big-5-European-Leagues-Stats', category='defense')
-    possession = get_stats(f'https://fbref.com/en/comps/Big5/{season}/possession/players/{season}-Big-5-European-Leagues-Stats', category='possession')
-    playing_time = get_stats(f'https://fbref.com/en/comps/Big5/{season}/playingtime/players/{season}-Big-5-European-Leagues-Stats', category='playing_time')
-    misc = get_stats(f'https://fbref.com/en/comps/Big5/{season}/misc/players/{season}-Big-5-European-Leagues-Stats', category='misc')
+    standard = get_stats(league='Big 5', category='standard', season=season)
+    shooting = get_stats(league='Big 5', category='shooting', season=season)
+    passing = get_stats(league='Big 5', category='passing', season=season)
+    pass_types = get_stats(league='Big 5', category='passing_types', season=season)
+    gca = get_stats(league='Big 5', category='gca', season=season)
+    defense = get_stats(league='Big 5', category='defense', season=season)
+    possession = get_stats(league='Big 5', category='possession', season=season)
+    playing_time = get_stats(league='Big 5', category='playingtime', season=season)
+    misc = get_stats(league='Big 5', category='misc', season=season)
 
     playing_time.drop(playing_time.loc[playing_time['Matches Played'] == '0'].index, inplace=True)
     playing_time['Rk']= playing_time.reset_index().index + 1
@@ -208,7 +230,7 @@ def cast_column(season: str, df: pd.DataFrame, big5: bool = True) -> pd.DataFram
 
     if big5:
         for col in df.columns:
-            if col in ['Rk', 'Player', 'Nation', 'Pos', 'Squad', 'Comp']:
+            if col in ['Rk', 'Player', 'Nation', 'Position', 'Squad', 'Comp']:
                 pass
             elif col in ['Age', 'Born', 'Matches Played', 'Starts', 'Minutes', 'Minutes per Match', 'Minutes per Start']:
                 df[col] = df[col].astype('int64')
@@ -216,7 +238,7 @@ def cast_column(season: str, df: pd.DataFrame, big5: bool = True) -> pd.DataFram
                 df[col] = df[col].astype('float64')
     else:
         for col in df.columns:
-            if col in ['Rk', 'Player', 'Nation', 'Pos', 'Squad', 'Comp']:
+            if col in ['Rk', 'Player', 'Nation', 'Position', 'Squad', 'Comp']:
                 pass
             elif col in ['Age', 'Born', 'Matches Played', 'Starts', 'Minutes', 'Minutes per Match', 'Minutes per Start']:
                 df[col] = df[col].apply(lambda x: x.replace(',', ''))

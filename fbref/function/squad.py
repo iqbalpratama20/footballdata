@@ -25,7 +25,7 @@ def clean_big5_df(df: pd.DataFrame) -> pd.DataFrame:
     df.drop(['Rk', 'Comp'], axis=1, inplace=True)
     return df
 
-def get_for_stats(league: str, season: str, category: str = None, big5: bool = False) -> pd.DataFrame:
+def get_for_stats(league: str, season: str, category: str = None) -> pd.DataFrame:
     
     if league == 'Big 5':
         standard = pd.read_html(f'https://fbref.com/en/comps/{LEAGUES[league][0]}/{season}/stats/squads/{season}-{LEAGUES[league][1]}-Stats')[0]
@@ -56,7 +56,7 @@ def get_for_stats(league: str, season: str, category: str = None, big5: bool = F
         standard, shooting, passing, pass_type, gca, defense, possession, playing_time, misc = (df.pipe(clean_df) for df in [standard, shooting, passing, pass_type, 
                                                                                                                             gca, defense, possession, playing_time, misc])
         
-    columns = ['Squad', '# Player', 'Age', 'Possession', 'Match Played', 'Starts', 'Minutes', '90s', 'Goals',
+    columns = ['Squad', '# Player', 'Age', 'Possession', 'Matches Played', 'Starts', 'Minutes', '90s', 'Goals',
                'Assists', 'G+A', 'Non Penalty Goals', 'Penalty Goals', 'Penalty Attempted', 'Yellow Cards',
                'Red Cards', 'xG', 'npxG', 'xAG', 'npxG+xAG', 'Progressive Carries', 'Progressive Passes', 
                'Goals/90', 'Assists/90', 'G+A/90', 'Non Penalty Goals/90', 'Non Penalty G+A/90', 'xG/90',
@@ -138,7 +138,7 @@ def get_for_stats(league: str, season: str, category: str = None, big5: bool = F
     
     df.drop([i for i in df.columns if 'remove' in i],
                axis=1, inplace=True)
-    df.drop(['# Player', 'Match Played', 'Minutes', 'Starts'], axis=1, inplace=True)
+    df.drop(['# Player', 'Matches Played', 'Minutes', 'Starts'], axis=1, inplace=True)
 
     new_columns = ['Squad ' + col if col != 'Squad' else col for col in df.columns ]
     df.columns = new_columns
@@ -175,7 +175,7 @@ def get_opponent_stats(league: str, season: str, category: str = None) -> pd.Dat
         standard, shooting, passing, pass_type, gca, defense, possession, playing_time, misc = (df.pipe(clean_df) for df in [standard, shooting, passing, pass_type, 
                                                                                                                             gca, defense, possession, playing_time, misc])
         
-    columns = ['Squad', '# Player', 'Age', 'Possession', 'Match Played', 'Starts', 'Minutes', '90s', 'Goals',
+    columns = ['Squad', '# Player', 'Age', 'Possession', 'Matches Played', 'Starts', 'Minutes', '90s', 'Goals',
                'Assists', 'G+A', 'Non Penalty Goals', 'Penalty Goals', 'Penalty Attempted', 'Yellow Cards',
                'Red Cards', 'xG', 'npxG', 'xAG', 'npxG+xAG', 'Progressive Carries', 'Progressive Passes', 
                'Goals/90', 'Assists/90', 'G+A/90', 'Non Penalty Goals/90', 'Non Penalty G+A/90', 'xG/90',
@@ -255,11 +255,11 @@ def get_opponent_stats(league: str, season: str, category: str = None) -> pd.Dat
         .merge(misc, on='Squad', suffixes=('', '_remove')) \
         .merge(playing_time, on='Squad', suffixes=('', '_remove'))
     
-    df['Squad'] = df['Squad'].apply(lambda x: x.split(' ')[1])
+    df['Squad'] = df['Squad'].apply(lambda x: ' '.join(x.split(' ')[1:]))
 
     df.drop([i for i in df.columns if 'remove' in i],
                axis=1, inplace=True)
-    df.drop(['# Player', 'Match Played', 'Minutes', 'Starts'], axis=1, inplace=True)
+    df.drop(['# Player', 'Matches Played', 'Minutes', 'Starts'], axis=1, inplace=True)
 
     new_columns = ['Opponent ' + col if col != 'Squad' else col for col in df.columns]
     df.columns = new_columns
