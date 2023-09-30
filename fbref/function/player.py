@@ -3,6 +3,7 @@ import re
 from bs4 import BeautifulSoup
 import pandas as pd
 import numpy as np
+import math
 
 LEAGUES = {'Eredivisie': ['23', 'Eredivisie'],
            'Primeira Liga': ['32', 'Primerira-Liga'],
@@ -281,3 +282,6 @@ def get_per_90(df: pd.DataFrame) -> pd.DataFrame:
             df[col] = round(df[col] / df['90s'], 2)
     
     return df
+
+def sigmoid(x):
+    return 2 / (1 + math.exp(-.1 * (x - 50)))
